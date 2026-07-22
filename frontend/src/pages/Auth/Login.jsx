@@ -1,74 +1,76 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import Input from "../../components/Inputs/Input"
-import { validateEmail } from "../../utils/helper"
+import { useContext, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Input from '../../components/Inputs/Input'
+import { validateEmail } from '../../utils/helper'
+import axiosInstance from '../../utils/axiosInstance'
+import { API_PATHS } from '../../utils/apiPaths'
+import { UserContext } from '../../context/useContext'
 
 const Login = ({ setCurrentPage }) => {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
 
+  const { updateUser } = useContext(UserContext)
   const navigate = useNavigate()
 
-  // Handle Login Form Submit
   const handleLogin = async (e) => {
     e.preventDefault()
 
-    if(!validateEmail(email)){
-      setError("Please enter a valid email address")
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address')
       return
     }
 
-    if(!password){
-      setError("Please enter a password")
+    if (!password) {
+      setError('Please enter a password')
       return
     }
-    setError("")
-    
-    // Login API Call
+
+    setError('')
+
     try {
-      
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email,
+        password
+      })
+      const { token } = response.data
+      localStorage.setItem('token', token)
+      updateUser(response.data)
+      navigate('/dashboard')
     } catch (error) {
-      if(error.repsonse && error.response.data.message){
+      if (error.response && error.response.data.message) {
         setError(error.response.data.message)
-      }else{
-        setError("An error occurred. Please try again.")
+      } else {
+        setError('An error occurred. Please try again.')
       }
     }
   }
+
   return (
-    <div className="w-[90vw] md:w-[33vw] p-7 flex flex-col justify-center">
-      <h3 className="text-lg font-semibold text-black">Welcome Back</h3>
-      <p className="text-xs text-slate-700 mt-[5px] mb-6">
-        Please enter your details to log in
-      </p>
-      <form onSubmit={handleLogin}>
-        <Input
-          value={email}
-          label="Email Address"
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="john@example.com"
-          type="email"
-          error={error}
-        />
-        <Input
-          value={password}
-          label="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          type="password"
-          error={error}
-        />
-        <button onClick={handleLogin} className="btn-primary text-center" type='submit'>
-          LOGIN
+    <div className="w-full p-6 sm:p-8">
+      <div className="mb-6 text-center sm:text-left">
+        <h3 className="text-2xl font-semibold text-slate-900">Welcome back</h3>
+        <p className="mt-1.25 text-sm text-slate-500">Sign in to continue your interview prep.</p>
+      </div>
+
+      <form onSubmit={handleLogin} className="space-y-1">
+        <Input value={email} label="Email address" onChange={(e) => setEmail(e.target.value)} placeholder="john@example.com" type="email" />
+        <Input value={password} label="Password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
+
+        {error && <p className="text-sm text-red-500">{error}</p>}
+
+        <button className="btn-primary mt-2" type="submit">
+          Login
         </button>
-        <p className="text-[13px] text-slate-600 mt-3">
-          Don't have an account?{" "}
-          <button className="font-medium text-primary underline cursor-pointer" onClick={() => {
-            setCurrentPage("register")
-          }}>Register</button>
-        </p>
       </form>
+
+      <p className="mt-4 text-center text-sm text-slate-500 sm:text-left">
+        New here?{' '}
+        <button className="font-semibold text-orange-600 underline" onClick={() => setCurrentPage('register')}>
+          Create an account
+        </button>
+      </p>
     </div>
   )
 }

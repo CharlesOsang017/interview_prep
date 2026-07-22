@@ -1,101 +1,117 @@
 @import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-    --font-display: "Urbanist", sans-serif;
-    --breakpoint-3xl: 1920px;
-    --color-primary: #FF9324;
+  --font-display: 'Urbanist', sans-serif;
+  --breakpoint-3xl: 1920px;
+  --color-primary: #ff9324;
 }
 
 @layer base {
-    html {
-        font-family: var(--font-display);
-    }
-    body{
-        background-color: #fcfbfc;
-        overflow-x: hidden;
-    }
+  html {
+    font-family: var(--font-display);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: linear-gradient(135deg, #fffaf2 0%, #fdf7f0 45%, #fff 100%);
+    color: #0f172a;
+    overflow-x: hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
 }
 
-/* Custom scrollbar styling */
-
 .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
+  width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(100, 100, 100, 0.4);
-    border-radius: 10px;
+  background-color: rgba(100, 100, 100, 0.35);
+  border-radius: 999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
+  background: transparent;
 }
 
 @layer utilities {
-    /* Animate text with a shine effect */
-    @keyframes shine {
-        0% {
-            background-position: 0%  50%;
-        }
-        100% {
-            background-position: 100% 50%;
-        }
+  @keyframes text-shine {
+    0% {
+      background-position: 0% 50%;
     }
-    .animate-text-shine{
-        animation: text-shine 2s ease-in-out infinite alternate;
+    100% {
+      background-position: 100% 50%;
     }
-    @keyframes blob1 {
-        0%, 100% {
-            transform: translate(0px, 0px) scale(1);
-        }
-        33% {
-            transform: translate(30px, -60px) scale(1.1);
-        }
-        66% {
-            transform: translate(-20px, 20px) scale(0.9);
-        }
-    }
-    @keyframes blob2 {
-        0%, 100% {
-            transform: translate(0px, 0px) scale(1);
-        }
-        33% {
-            transform: translate(-40px, 60px) scale(1.85);
-        }
-        66% {
-            transform: translate(20px, -40px) scale(0.95);
-        }
+  }
 
+  .animate-text-shine {
+    animation: text-shine 2.2s ease-in-out infinite alternate;
+  }
+
+  @keyframes blob1 {
+    0%,
+    100% {
+      transform: translate(0px, 0px) scale(1);
     }
-    @keyframes blob3 {
-        0%, 100% {
-            transform: translate(0px, 0px) scale(1);
-        }
-        33% {
-            transform: translate(20px, 140px) scale(1.15);
-        }
-        66% {
-            transform: translate(-30px, -30px) scale(0.85);
-        }
+    33% {
+      transform: translate(30px, -60px) scale(1.1);
     }
-    .animate-blob1{
-        animation: blob1 8s ease-in-out infinite;
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
     }
-    .animate-blob2{
-        animation: blob2 10s ease-in-out infinite;
+  }
+
+  @keyframes blob2 {
+    0%,
+    100% {
+      transform: translate(0px, 0px) scale(1);
     }
-    .animate-blob3{
-        animation: blob3 12s ease-in-out infinite;
+    33% {
+      transform: translate(-40px, 60px) scale(1.85);
     }
+    66% {
+      transform: translate(20px, -40px) scale(0.95);
+    }
+  }
+
+  @keyframes blob3 {
+    0%,
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(20px, 140px) scale(1.15);
+    }
+    66% {
+      transform: translate(-30px, -30px) scale(0.85);
+    }
+  }
+
+  .animate-blob1 {
+    animation: blob1 8s ease-in-out infinite;
+  }
+
+  .animate-blob2 {
+    animation: blob2 10s ease-in-out infinite;
+  }
+
+  .animate-blob3 {
+    animation: blob3 12s ease-in-out infinite;
+  }
 }
 
 .input-box {
-    @apply w-full flex justify-between gap-3  text-sm text-black bg-gray-50/50 rounded px-4 py-3 mb-4 mt-3 border border-gray-100 outline-none focus-within:border-orange-300;
+  @apply flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus-within:border-orange-300 focus-within:ring-2 focus-within:ring-orange-100;
 }
+
 .btn-primary {
-    @apply w-full flex items-center justify-between gap-3 text-sm font-medium text-white bg-black shadow-lg shadow-orange-600/5 p-[10px] rounded-md my-1 hover:bg-orange-600/15 hover:text-black cursor-pointer ;
+  @apply flex w-full items-center justify-center gap-3 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-200 transition hover:bg-orange-500;
 }
+
 .btn-small {
-    @apply  flex items-center justify-center gap-3 bg-linear-to-r from-[#FF9324] to-[#e99ab4] text-white text-sm font-semibold p-[10px]  px-7 py-2 rounded-lg hover:bg-black hover:text-white transition-colors  cursor-pointer hover:shadow-2xl hover:shadow-orange-300;
+  @apply flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-amber-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-200 transition hover:-translate-y-0.5 hover:shadow-xl;
 }

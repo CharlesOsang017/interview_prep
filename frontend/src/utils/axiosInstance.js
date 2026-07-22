@@ -1,3 +1,6 @@
+import axios from "axios";
+import { BASE_URL } from "./apiPaths";
+
 const axiosInstance = axios.create({
     baseURL: BASE_URL,
     headers: {
@@ -25,11 +28,11 @@ axiosInstance.interceptors.response.use(
     (response)=> { return response},
     (error)=>{
         // Handle Common errors globally
-        if(error.reponse){
+        if(error.response){
             if(error.response.status === 401){
                 // Redirect to login page
                 window.location.href = "/";
-            }else if(error.respnse.status === 500){
+            }else if(error.response.status === 500){
                 console.log("Server error, please try again later")
             }
         }else if (error.code === "ECONNABORTED"){
