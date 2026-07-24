@@ -45,7 +45,7 @@ const LandingPage = () => {
               <ProfileInfoCard />
             ) : (
               <button
-                className="rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-orange-300 hover:text-orange-600 sm:px-5"
+                className="rounded-full cursor-pointer border border-orange-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-orange-300 hover:text-orange-600 sm:px-5"
                 onClick={() => setOpenAuthModal(true)}
               >
                 Login / Register
@@ -70,7 +70,7 @@ const LandingPage = () => {
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <button className="btn-small" onClick={handleCTA}>
+                  <button className="btn-small cursor-pointer" onClick={handleCTA}>
                     Get started <LuArrowRight />
                   </button>
                   <a href="#features" className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-orange-200 hover:text-orange-600">

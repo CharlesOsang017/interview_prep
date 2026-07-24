@@ -55,19 +55,19 @@ const Login = ({ setCurrentPage }) => {
       </div>
 
       <form onSubmit={handleLogin} className="space-y-1">
-        <Input value={email} label="Email address" onChange={(e) => setEmail(e.target.value)} placeholder="john@example.com" type="email" />
-        <Input value={password} label="Password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
+        <Input value={email} label="Email address"  onChange={(e) => setEmail(e.target.value)} placeholder="john@example.com" type="email" className='text-lg' />
+        <Input value={password} label="Password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password"  className='text-lg' />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <button className="btn-primary mt-2" type="submit">
+        <button className="btn-primary mt-2 cursor-pointer" type="submit">
           Login
         </button>
       </form>
 
       <p className="mt-4 text-center text-sm text-slate-500 sm:text-left">
         New here?{' '}
-        <button className="font-semibold text-orange-600 underline" onClick={() => setCurrentPage('register')}>
+        <button className="font-semibold text-orange-600 hover:underline cursor-pointer" onClick={() => setCurrentPage('register')}>
           Create an account
         </button>
       </p>
