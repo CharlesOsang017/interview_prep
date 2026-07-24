@@ -38,7 +38,7 @@ const InterviewPrep = () => {
   const [noteText, setNoteText] = useState({})
   const [savingNote, setSavingNote] = useState(null)
   const [pinningId, setPinningId] = useState(null)
-  const [explanation, setExplanation] = useState(null)
+  const [explanations, setExplanations] = useState({})
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false)
   const [explainingId, setExplainingId] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
@@ -108,14 +108,22 @@ const InterviewPrep = () => {
   }
 
   const handleExplainConcept = async (question) => {
+    // Toggle off if already showing for this question
+    if (explanations[question._id]) {
+      setExplanations((prev) => {
+        const next = { ...prev }
+        delete next[question._id]
+        return next
+      })
+      return
+    }
     setIsLoadingExplanation(true)
     setExplainingId(question._id)
-    setExplanation(null)
     try {
       const response = await axiosInstance.post(API_PATHS.AI.GENERATE_EXPLANATION, {
         question: question.question
       })
-      setExplanation({ ...response.data, questionId: question._id })
+      setExplanations((prev) => ({ ...prev, [question._id]: response.data }))
     } catch (error) {
       toast.error('Failed to generate explanation')
     } finally {
@@ -216,29 +224,6 @@ const InterviewPrep = () => {
           )}
         </section>
 
-        {/* AI Explanation Panel */}
-        {explanation && (
-          <section className="rounded-4xl border border-amber-200 bg-amber-50/80 p-6 shadow-sm sm:p-8">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
-                <LuBookOpen size={16} /> Concept Deep Dive
-              </div>
-              <button
-                onClick={() => setExplanation(null)}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-slate-400 hover:bg-white hover:text-slate-600"
-              >
-                ✕
-              </button>
-            </div>
-            <h3 className="mt-3 text-xl font-semibold text-slate-900">{explanation.title}</h3>
-            <div className="mt-4 leading-7 text-slate-700">
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownRenderers}>
-                {explanation.explanation}
-              </ReactMarkdown>
-            </div>
-          </section>
-        )}
-
         {/* Questions List */}
         <section className="rounded-4xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="mb-6 flex items-center justify-between">
@@ -324,9 +309,24 @@ const InterviewPrep = () => {
                           ) : (
                             <LuSparkles size={14} />
                           )}
-                          Explain concept
+                          {explanations[q._id] ? 'Hide explanation' : 'Explain concept'}
                         </button>
                       </div>
+
+                      {/* Concept Deep Dive */}
+                      {explanations[q._id] && (
+                        <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
+                          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-700">
+                            <LuBookOpen size={14} /> Concept Deep Dive
+                          </div>
+                          <h4 className="mt-2 text-base font-semibold text-slate-900">{explanations[q._id].title}</h4>
+                          <div className="mt-3 leading-7 text-slate-700">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownRenderers}>
+                              {explanations[q._id].explanation}
+                            </ReactMarkdown>
+                          </div>
+                        </section>
+                      )}
 
                       {/* Notes */}
                       <div className="mt-4">

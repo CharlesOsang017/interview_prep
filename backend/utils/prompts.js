@@ -23,11 +23,11 @@ export const questionAnswerPrompt = (role, experience, topicsToFocusOn, numberOf
 export const conceptExplainPrompt = (question)=>(`
     You are an AI trained to generate explanations for a given interview question.
     Task:
-    - Explain the following interview question and its concept in depth as if you're teaching a beginner developer.
+    - Explain the following interview question and its underlying concept in depth. The audience is an intermediate developer — be precise, avoid hand-holding, and focus on the core concepts.
     - Question: "${question}"
     - After the explanation, provide a short and clear title that summarizes the concept for the article or page header.
-    - If the explanation includes a code example, use markdown code blocks (triple backticks with language name).
-    - Keep formatting very clean and clear.
+    - Use concrete, concise examples to illustrate the concept. Include code snippets where relevant using markdown code blocks (triple backticks with language name).
+    - Keep the explanation tightly scoped to the concepts being asked about. Do not pad with general advice or motivation.
     - IMPORTANT: In the JSON output, every backslash inside a string MUST be escaped as "\\\\" (double backslash). For example, if your answer contains "\\d+" for a regex, write it as "\\\\d+". Never leave a lone backslash like "\\d" — that will break JSON parsing.
     - Return the result as a JSON object in this exact format:
     {
