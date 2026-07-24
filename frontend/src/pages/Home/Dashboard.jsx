@@ -85,7 +85,7 @@ const Dashboard = () => {
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-500">Dashboard</p>
               <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-                Hey, {user?.name?.split(' ')[0] || 'there'} 👋
+                Hey, {user?.name?.split(' ')[0] || 'there'}
               </h1>
               <p className="mt-2 max-w-xl text-sm leading-7 text-slate-600">
                 Jump into a mock interview, review your prep notes, and keep your confidence increasing.
@@ -118,7 +118,7 @@ const Dashboard = () => {
 
         {/* Actions */}
         <div className="flex flex-wrap gap-3">
-          <button className="btn-small" onClick={() => setShowNewSession(true)}>
+          <button className="btn-small cursor-pointer" onClick={() => setShowNewSession(true)}>
             <LuPlus size={18} /> New Session
           </button>
         </div>
@@ -131,7 +131,7 @@ const Dashboard = () => {
               <LuBrain size={40} className="mx-auto text-slate-300" />
               <h3 className="mt-4 text-lg font-semibold text-slate-900">No sessions yet</h3>
               <p className="mt-2 text-sm text-slate-500">Create your first interview prep session to get started.</p>
-              <button className="btn-small mt-5 !inline-flex" onClick={() => setShowNewSession(true)}>
+              <button className="btn-small mt-5 !inline-flex cursor-pointer" onClick={() => setShowNewSession(true)}>
                 <LuPlus size={18} /> Create Session
               </button>
             </div>

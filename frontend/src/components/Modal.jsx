@@ -13,13 +13,13 @@ const Modal = ({ children, isOpen, onClose, title, hideHeader }) => {
         )}
 
         <button
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-orange-100 hover:text-orange-600"
+          className="absolute cursor-pointer right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-orange-100 hover:text-orange-600"
           type="button"
           onClick={onClose}
         >
-          <svg className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1l6 6M0 0l6 6M7 7l6-6M7 7l-6 6" />
-          </svg>
+      <svg className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1l12 12M13 1l-12 12" />
+</svg>
         </button>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar">

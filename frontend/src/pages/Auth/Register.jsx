@@ -39,9 +39,9 @@ const Register = ({ setCurrentPage }) => {
     }
 
     setError('')
-    setIsLoading(true)
-
+    
     try {
+      setIsLoading(true)
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
         name: fullName,
         email,
@@ -70,22 +70,21 @@ const Register = ({ setCurrentPage }) => {
         <p className="mt-1 text-sm text-slate-500">Join the platform and start practising today.</p>
       </div>
 
-      <form onSubmit={handleRegister} className="space-y-1">
-        <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
+      <form onSubmit={handleRegister} className="space-y-1">        
         <Input value={fullName} label="Full name" onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" type="text" />
         <Input value={email} label="Email address" onChange={(e) => setEmail(e.target.value)} placeholder="john@example.com" type="email" />
         <Input value={password} label="Password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <button className="btn-primary mt-2" type="submit" disabled={isLoading}>
+        <button className="btn-primary mt-2 cursor-pointer" type="submit" disabled={isLoading}>
           {isLoading ? <Loader size="sm" /> : 'Register'}
         </button>
       </form>
 
       <p className="mt-4 text-center text-sm text-slate-500 sm:text-left">
         Already have an account?{' '}
-        <button className="font-semibold text-orange-600 underline" onClick={() => setCurrentPage('login')}>
+        <button className="font-semibold text-orange-600 cursor-pointer hover:underline" onClick={() => setCurrentPage('login')}>
           Sign in
         </button>
       </p>

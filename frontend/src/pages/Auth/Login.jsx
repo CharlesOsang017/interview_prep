@@ -5,16 +5,18 @@ import { validateEmail } from '../../utils/helper'
 import axiosInstance from '../../utils/axiosInstance'
 import { API_PATHS } from '../../utils/apiPaths'
 import { UserContext } from '../../context/useContext'
+import Loader from '../../components/Loader/Loader'
 
 const Login = ({ setCurrentPage }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const { updateUser } = useContext(UserContext)
   const navigate = useNavigate()
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e) => {    
     e.preventDefault()
 
     if (!validateEmail(email)) {
@@ -30,6 +32,7 @@ const Login = ({ setCurrentPage }) => {
     setError('')
 
     try {
+      setLoading(true)
       const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
         email,
         password
@@ -44,6 +47,7 @@ const Login = ({ setCurrentPage }) => {
       } else {
         setError('An error occurred. Please try again.')
       }
+      setLoading(false)
     }
   }
 
@@ -61,7 +65,7 @@ const Login = ({ setCurrentPage }) => {
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <button className="btn-primary mt-2 cursor-pointer" type="submit">
-          Login
+          {loading ? <Loader size='sm' /> : "Login"}
         </button>
       </form>
 
