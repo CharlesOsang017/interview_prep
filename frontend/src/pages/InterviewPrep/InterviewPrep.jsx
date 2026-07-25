@@ -181,7 +181,7 @@ const InterviewPrep = () => {
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-orange-200 hover:text-orange-600"
+            className="flex cursor-pointer w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-orange-200 hover:text-orange-600"
           >
             <LuArrowLeft /> Dashboard
           </button>
@@ -259,7 +259,7 @@ const InterviewPrep = () => {
                     <div className="flex items-center gap-1 shrink-0">
                       <button
                         onClick={(e) => { e.stopPropagation(); handleCopyQuestion(q.question, `copy-${q._id}`) }}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-slate-600"
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-slate-600"
                         title="Copy question"
                       >
                         {copiedId === `copy-${q._id}` ? <LuCheck size={14} className="text-green-500" /> : <LuCopy size={14} />}
@@ -267,7 +267,7 @@ const InterviewPrep = () => {
                       <button
                         onClick={(e) => { e.stopPropagation(); handleTogglePin(q._id) }}
                         disabled={pinningId === q._id}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-amber-500"
+                        className="flex cursor-pointer h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-amber-500"
                         title={q.isPinned ? 'Unpin' : 'Pin'}
                       >
                         {pinningId === q._id ? (
@@ -302,7 +302,7 @@ const InterviewPrep = () => {
                         <button
                           onClick={() => handleExplainConcept(q)}
                           disabled={isLoadingExplanation && explainingId === q._id}
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"
                         >
                           {isLoadingExplanation && explainingId === q._id ? (
                             <Loader size="sm" />
@@ -346,7 +346,7 @@ const InterviewPrep = () => {
                           <button
                             onClick={() => handleSaveNote(q._id)}
                             disabled={savingNote === q._id}
-                            className="self-end rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50"
+                            className="self-end cursor-pointer rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50"
                           >
                             {savingNote === q._id ? <Loader size="sm" /> : <LuSend size={16} />}
                           </button>

@@ -76,6 +76,13 @@ const Dashboard = () => {
     )
   }
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(255,147,36,0.16),_transparent_30%)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -84,8 +91,8 @@ const Dashboard = () => {
           <div className="flex items-start gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-500">Dashboard</p>
-              <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-                Hey, {user?.name?.split(' ')[0] || 'there'}
+              <h1 className="mt-2 text-xl sm:text-2xl md:text-3xl font-semibold text-slate-900">
+                {getGreeting()},  {user?.name}
               </h1>
               <p className="mt-2 max-w-xl text-sm leading-7 text-slate-600">
                 Jump into a mock interview, review your prep notes, and keep your confidence increasing.
@@ -109,7 +116,7 @@ const Dashboard = () => {
                 <stat.icon size={22} />
               </div>
               <div>
-                <p className="text-2xl font-semibold text-slate-900">{stat.value}</p>
+                <p className="text-md font-semibold text-slate-900">{stat.value}</p>
                 <p className="text-sm text-slate-500">{stat.label}</p>
               </div>
             </div>
@@ -150,7 +157,7 @@ const Dashboard = () => {
                     <button
                       onClick={(e) => handleDeleteSession(session._id, e)}
                       disabled={deletingId === session._id}
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                     >
                       {deletingId === session._id ? <Loader size="sm" /> : <LuTrash2 size={15} />}
                     </button>
