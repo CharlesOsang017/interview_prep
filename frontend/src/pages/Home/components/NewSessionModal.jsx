@@ -136,13 +136,13 @@ const NewSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
             {step === 1 ? 'New Interview Session' : 'Review Questions'}
           </h3>
           <button
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-orange-100 hover:text-orange-600"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-orange-100 hover:text-orange-600"
             type="button"
             onClick={handleClose}
           >
-            <svg className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1l6 6M0 0l6 6M7 7l6-6M7 7l-6 6" />
-            </svg>
+        <svg className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1l12 12M13 1l-12 12" />
+</svg>
           </button>
         </div>
 
@@ -231,7 +231,7 @@ const NewSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
                   <button
                     type="button"
                     onClick={addCustomTopic}
-                    className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
+                    className="rounded-2xl cursor-pointer bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
                   >
                     Add
                   </button>
@@ -250,7 +250,7 @@ const NewSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
                   max="15"
                   value={numQuestions}
                   onChange={(e) => setNumQuestions(Number(e.target.value))}
-                  className="w-full accent-orange-500"
+                  className="w-full accent-orange-500 cursor-pointer"
                 />
                 <p className="text-sm text-slate-500">{numQuestions} questions</p>
               </div>
@@ -292,7 +292,7 @@ const NewSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-600"
+              className="rounded-full border cursor-pointer border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-600"
             >
               Back
             </button>
@@ -302,7 +302,7 @@ const NewSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-600"
+              className="rounded-full cursor-pointer border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-600"
             >
               Cancel
             </button>
@@ -311,7 +311,7 @@ const NewSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
                 type="button"
                 onClick={handleGenerateQuestions}
                 disabled={!canProceedToGenerate || isGenerating}
-                className="btn-small !w-auto disabled:opacity-50"
+                className="btn-small !w-auto disabled:opacity-50 cursor-pointer"
               >
                 {isGenerating ? <Loader size="sm" /> : 'Generate Questions'}
               </button>
@@ -320,7 +320,7 @@ const NewSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
                 type="button"
                 onClick={handleCreateSession}
                 disabled={isGenerating}
-                className="btn-small !w-auto disabled:opacity-50"
+                className="btn-small !w-auto cursor-pointer disabled:opacity-50"
               >
                 {isGenerating ? <Loader size="sm" /> : 'Save Session'}
               </button>
