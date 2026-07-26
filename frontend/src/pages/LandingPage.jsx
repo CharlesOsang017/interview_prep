@@ -2,6 +2,7 @@ import { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { APP_FEATURES } from '../utils/data'
 import HERO_IMG from '../assets/hero_image.jpg'
+import IP_LOGO from "../assets/ip_logo.webp"
 import { LuArrowRight, LuBookOpen, LuMic, LuSparkles } from 'react-icons/lu'
 import Modal from '../components/Modal'
 import Register from './Auth/Register'
@@ -33,7 +34,7 @@ const LandingPage = () => {
           <header className="flex items-center justify-between rounded-full border border-white/70 bg-white/70 px-4 py-3 shadow-sm backdrop-blur sm:px-6">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-500 text-lg font-semibold text-white">
-                IP
+                <img src={IP_LOGO} alt="IP_LOGO" />
               </div>
               <div className='hidden sm:block'>
                 <p className="text-base font-semibold text-slate-900">Interview Prep</p>
