@@ -20,6 +20,17 @@ app.use(cors({
 // middleware
 app.use(express.json())
 
+// Connect to DB on every request (required for Vercel serverless — listen() never fires)
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        console.error('Database connection failed:', error.message);
+        res.status(500).json({ message: 'Database connection failed' });
+    }
+});
+
 // Routes
 app.use("/api/auth", authRoutes)
 app.use("/api/sessions", sessionRoutes)
@@ -35,8 +46,8 @@ app.get('/', (req, res) => {
   });
 
 
-// start server
-const PORT = process.env.PORT;
+// start server (runs only locally — Vercel serverless ignores this)
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
     connectDB()
