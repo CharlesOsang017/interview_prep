@@ -29,6 +29,12 @@ app.use("/api/questions", questionRoutes)
 app.use("/api/ai/generate-questions", protect, generateInterviewQuestions)
 app.use("/api/ai/generate-explanation", protect, generateConceptExplanation)
 
+
+app.get('/', (req, res) => {
+    res.send("<h3>The server is up and running!</h3>");
+  });
+
+
 // start server
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
