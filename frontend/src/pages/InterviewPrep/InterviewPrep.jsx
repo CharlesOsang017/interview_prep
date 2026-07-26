@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   LuArrowLeft, LuBrain, LuPin, LuPinOff, LuSparkles, LuBookOpen,
   LuSend, LuChevronDown, LuChevronUp, LuCopy, LuCheck, LuFileText,
-  LuPlus, LuLoader
+  LuPlus, LuLoader, LuLightbulb
 } from 'react-icons/lu'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -39,13 +39,15 @@ const InterviewPrep = () => {
   const [noteText, setNoteText] = useState({})
   const [savingNote, setSavingNote] = useState(null)
   const [pinningId, setPinningId] = useState(null)
-  const [explanations, setExplanations] = useState({})
-  const [isLoadingExplanation, setIsLoadingExplanation] = useState(false)
-  const [explainingId, setExplainingId] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
   const [visibleCount, setVisibleCount] = useState(10)
   const [isGeneratingMore, setIsGeneratingMore] = useState(false)
   const [isAddingQuestions, setIsAddingQuestions] = useState(false)
+
+  // Toggle panels per question: { [questionId]: { explanation, answerTip } }
+  const [openPanels, setOpenPanels] = useState({})
+  // Loading states per question: { [questionId]: 'explain' | 'tip' | null }
+  const [loadingPanel, setLoadingPanel] = useState({})
 
   const fetchSession = useCallback(async () => {
     if (!sessionId || sessionId === 'demo') {
@@ -117,27 +119,78 @@ const InterviewPrep = () => {
   }
 
   const handleExplainConcept = async (question) => {
-    // Toggle off if already showing for this question
-    if (explanations[question._id]) {
-      setExplanations((prev) => {
-        const next = { ...prev }
-        delete next[question._id]
-        return next
-      })
+    const qId = question._id
+
+    // If already persisted in DB, just toggle the panel
+    if (question.explanation?.title && question.explanation?.explanation) {
+      setOpenPanels((prev) => ({
+        ...prev,
+        [qId]: { ...prev[qId], explanation: !prev[qId]?.explanation }
+      }))
       return
     }
-    setIsLoadingExplanation(true)
-    setExplainingId(question._id)
+
+    // Prevent duplicate loading
+    if (loadingPanel[qId] === 'explain') return
+
+    setLoadingPanel((prev) => ({ ...prev, [qId]: 'explain' }))
     try {
-      const response = await axiosInstance.post(API_PATHS.AI.GENERATE_EXPLANATION, {
-        question: question.question
-      })
-      setExplanations((prev) => ({ ...prev, [question._id]: response.data }))
+      const response = await axiosInstance.post(API_PATHS.QUESTION.EXPLAIN(qId))
+      // Update the question in session with the persisted explanation
+      setSession((prev) => ({
+        ...prev,
+        questions: prev.questions.map((q) =>
+          q._id === qId ? response.data.question : q
+        )
+      }))
+      // Open the panel
+      setOpenPanels((prev) => ({
+        ...prev,
+        [qId]: { ...prev[qId], explanation: true }
+      }))
+      toast.success('Explanation generated!')
     } catch (error) {
       toast.error('Failed to generate explanation')
     } finally {
-      setIsLoadingExplanation(false)
-      setExplainingId(null)
+      setLoadingPanel((prev) => ({ ...prev, [qId]: null }))
+    }
+  }
+
+  const handleAnswerTip = async (question) => {
+    const qId = question._id
+
+    // If already persisted in DB, just toggle the panel
+    if (question.answerTip) {
+      setOpenPanels((prev) => ({
+        ...prev,
+        [qId]: { ...prev[qId], answerTip: !prev[qId]?.answerTip }
+      }))
+      return
+    }
+
+    // Prevent duplicate loading
+    if (loadingPanel[qId] === 'tip') return
+
+    setLoadingPanel((prev) => ({ ...prev, [qId]: 'tip' }))
+    try {
+      const response = await axiosInstance.post(API_PATHS.QUESTION.ANSWER_TIP(qId))
+      // Update the question in session with the persisted tip
+      setSession((prev) => ({
+        ...prev,
+        questions: prev.questions.map((q) =>
+          q._id === qId ? response.data.question : q
+        )
+      }))
+      // Open the panel
+      setOpenPanels((prev) => ({
+        ...prev,
+        [qId]: { ...prev[qId], answerTip: true }
+      }))
+      toast.success('Answer tip generated!')
+    } catch (error) {
+      toast.error('Failed to generate answer tip')
+    } finally {
+      setLoadingPanel((prev) => ({ ...prev, [qId]: null }))
     }
   }
 
@@ -165,7 +218,6 @@ const InterviewPrep = () => {
     if (!session) return
     setIsGeneratingMore(true)
     try {
-      // Generate 7 new questions via AI
       const generateRes = await axiosInstance.post(API_PATHS.AI.GENERATE_QUESTIONS, {
         role: session.role,
         experience: session.experience,
@@ -181,15 +233,12 @@ const InterviewPrep = () => {
 
       setIsAddingQuestions(true)
 
-      // Add questions to the session
       await axiosInstance.post(API_PATHS.QUESTION.ADD_TO_SESSION, {
         sessionId: session._id,
         questions: newQuestions,
       })
 
       toast.success(`Added ${newQuestions.length} new questions!`)
-
-      // Re-fetch the session to show the updated questions
       await fetchSession()
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to generate more questions')
@@ -294,123 +343,167 @@ const InterviewPrep = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {visibleQuestions.map((q, idx) => (
-                <div key={q._id} className="rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-slate-300">
-                  {/* Question Header */}
-                  <div
-                    className="flex cursor-pointer items-start justify-between gap-4 p-4 sm:p-5"
-                    onClick={() => setExpandedQuestion(expandedQuestion === q._id ? null : q._id)}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        {q.isPinned && (
-                          <LuPin size={14} className="shrink-0 text-amber-500" />
-                        )}
-                        <p className="text-sm font-semibold text-slate-900">
-                          {idx + 1}. {q.question}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleCopyQuestion(q.question, `copy-${q._id}`) }}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-slate-600"
-                        title="Copy question"
-                      >
-                        {copiedId === `copy-${q._id}` ? <LuCheck size={14} className="text-green-500" /> : <LuCopy size={14} />}
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleTogglePin(q._id) }}
-                        disabled={pinningId === q._id}
-                        className="flex cursor-pointer h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-amber-500"
-                        title={q.isPinned ? 'Unpin' : 'Pin'}
-                      >
-                        {pinningId === q._id ? (
-                          <Loader size="sm" />
-                        ) : q.isPinned ? (
-                          <LuPinOff size={14} />
-                        ) : (
-                          <LuPin size={14} />
-                        )}
-                      </button>
-                      <div className="text-slate-400">
-                        {expandedQuestion === q._id ? <LuChevronUp size={16} /> : <LuChevronDown size={16} />}
-                      </div>
-                    </div>
-                  </div>
+              {visibleQuestions.map((q, idx) => {
+                const hasExplanation = q.explanation?.title && q.explanation?.explanation
+                const hasTip = q.answerTip
+                const isExplainOpen = openPanels[q._id]?.explanation
+                const isTipOpen = openPanels[q._id]?.answerTip
 
-                  {/* Expanded Content */}
-                  {expandedQuestion === q._id && (
-                    <div className="border-t border-slate-200 px-4 pb-5 pt-4 sm:px-5">
-                      {/* Answer */}
-                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Answer</p>
-                        <div className="leading-7 text-slate-700">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownRenderers}>
-                            {q.answer}
-                          </ReactMarkdown>
+                return (
+                  <div key={q._id} className="rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-slate-300">
+                    {/* Question Header */}
+                    <div
+                      className="flex cursor-pointer items-start justify-between gap-4 p-4 sm:p-5"
+                      onClick={() => setExpandedQuestion(expandedQuestion === q._id ? null : q._id)}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          {q.isPinned && (
+                            <LuPin size={14} className="shrink-0 text-amber-500" />
+                          )}
+                          <p className="text-sm font-semibold text-slate-900">
+                            {idx + 1}. {q.question}
+                          </p>
                         </div>
                       </div>
-
-                      {/* Action Buttons */}
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
-                          onClick={() => handleExplainConcept(q)}
-                          disabled={isLoadingExplanation && explainingId === q._id}
-                          className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"
+                          onClick={(e) => { e.stopPropagation(); handleCopyQuestion(q.question, `copy-${q._id}`) }}
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-slate-600"
+                          title="Copy question"
                         >
-                          {isLoadingExplanation && explainingId === q._id ? (
-                            <Loader size="sm" />
-                          ) : (
-                            <LuSparkles size={14} />
-                          )}
-                          {explanations[q._id] ? 'Hide explanation' : 'Explain concept'}
+                          {copiedId === `copy-${q._id}` ? <LuCheck size={14} className="text-green-500" /> : <LuCopy size={14} />}
                         </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleTogglePin(q._id) }}
+                          disabled={pinningId === q._id}
+                          className="flex cursor-pointer h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-amber-500"
+                          title={q.isPinned ? 'Unpin' : 'Pin'}
+                        >
+                          {pinningId === q._id ? (
+                            <Loader size="sm" />
+                          ) : q.isPinned ? (
+                            <LuPinOff size={14} />
+                          ) : (
+                            <LuPin size={14} />
+                          )}
+                        </button>
+                        <div className="text-slate-400">
+                          {expandedQuestion === q._id ? <LuChevronUp size={16} /> : <LuChevronDown size={16} />}
+                        </div>
                       </div>
+                    </div>
 
-                      {/* Concept Deep Dive */}
-                      {explanations[q._id] && (
-                        <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
-                          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-700">
-                            <LuBookOpen size={14} /> Concept Deep Dive
-                          </div>
-                          <h4 className="mt-2 text-base font-semibold text-slate-900">{explanations[q._id].title}</h4>
-                          <div className="mt-3 leading-7 text-slate-700">
+                    {/* Expanded Content */}
+                    {expandedQuestion === q._id && (
+                      <div className="border-t border-slate-200 px-4 pb-5 pt-4 sm:px-5">
+                        {/* Answer */}
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Answer</p>
+                          <div className="leading-7 text-slate-700">
                             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownRenderers}>
-                              {explanations[q._id].explanation}
+                              {q.answer}
                             </ReactMarkdown>
                           </div>
-                        </section>
-                      )}
+                        </div>
 
-                      {/* Notes */}
-                      <div className="mt-4">
-                        <label className="mb-2 flex items-center gap-2 text-xs font-semibold text-slate-500">
-                          <LuFileText size={14} /> Notes
-                        </label>
-                        <div className="flex gap-2">
-                          <textarea
-                            value={noteText[q._id] ?? q.note ?? ''}
-                            onChange={(e) =>
-                              setNoteText((prev) => ({ ...prev, [q._id]: e.target.value }))
-                            }
-                            placeholder="Add your notes here..."
-                            rows={3}
-                            className="flex-1 rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
-                          />
+                        {/* Action Buttons */}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {/* Explain Concept */}
                           <button
-                            onClick={() => handleSaveNote(q._id)}
-                            disabled={savingNote === q._id}
-                            className="self-end cursor-pointer rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50"
+                            onClick={() => handleExplainConcept(q)}
+                            disabled={loadingPanel[q._id] === 'explain'}
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"
                           >
-                            {savingNote === q._id ? <Loader size="sm" /> : <LuSend size={16} />}
+                            {loadingPanel[q._id] === 'explain' ? (
+                              <Loader size="sm" />
+                            ) : (
+                              <LuSparkles size={14} />
+                            )}
+                            {loadingPanel[q._id] === 'explain'
+                              ? 'Generating...'
+                              : hasExplanation
+                                ? isExplainOpen ? 'Hide explanation' : 'Show explanation'
+                                : 'Explain concept'}
+                          </button>
+
+                          {/* Answer Tip */}
+                          <button
+                            onClick={() => handleAnswerTip(q)}
+                            disabled={loadingPanel[q._id] === 'tip'}
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                          >
+                            {loadingPanel[q._id] === 'tip' ? (
+                              <Loader size="sm" />
+                            ) : (
+                              <LuLightbulb size={14} />
+                            )}
+                            {loadingPanel[q._id] === 'tip'
+                              ? 'Generating...'
+                              : hasTip
+                                ? isTipOpen ? 'Hide tips' : 'Show answer tips'
+                                : 'Get answer tips'}
                           </button>
                         </div>
+
+                        {/* Concept Deep Dive */}
+                        {hasExplanation && isExplainOpen && (
+                          <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
+                            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-700">
+                              <LuBookOpen size={14} /> Concept Deep Dive
+                            </div>
+                            <h4 className="mt-2 text-base font-semibold text-slate-900">{q.explanation.title}</h4>
+                            <div className="mt-3 leading-7 text-slate-700">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownRenderers}>
+                                {q.explanation.explanation}
+                              </ReactMarkdown>
+                            </div>
+                          </section>
+                        )}
+
+                        {/* Answer Tips */}
+                        {hasTip && isTipOpen && (
+                          <section className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4">
+                            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                              <LuLightbulb size={14} /> How to Answer This
+                            </div>
+                            <div className="mt-3 leading-7 text-slate-700">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownRenderers}>
+                                {q.answerTip}
+                              </ReactMarkdown>
+                            </div>
+                          </section>
+                        )}
+
+                        {/* Notes */}
+                        <div className="mt-4">
+                          <label className="mb-2 flex items-center gap-2 text-xs font-semibold text-slate-500">
+                            <LuFileText size={14} /> Notes
+                          </label>
+                          <div className="flex gap-2">
+                            <textarea
+                              value={noteText[q._id] ?? q.note ?? ''}
+                              onChange={(e) =>
+                                setNoteText((prev) => ({ ...prev, [q._id]: e.target.value }))
+                              }
+                              placeholder="Add your notes here..."
+                              rows={3}
+                              className="flex-1 rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
+                            />
+                            <button
+                              onClick={() => handleSaveNote(q._id)}
+                              disabled={savingNote === q._id}
+                              className="self-end cursor-pointer rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50"
+                            >
+                              {savingNote === q._id ? <Loader size="sm" /> : <LuSend size={16} />}
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                )
+              })}
 
               {/* Load More Button */}
               {hasMore && (

@@ -17,6 +17,14 @@ const questionSchema = new mongoose.Schema({
     isPinned: {
         type: Boolean,
         default: false
+    },
+    explanation: {
+        title: { type: String, default: '' },
+        explanation: { type: String, default: '' },
+    },
+    answerTip: {
+        type: String,
+        default: '',
     }
     
 }, {timestamps: true})

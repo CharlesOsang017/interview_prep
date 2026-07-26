@@ -36,3 +36,26 @@ export const conceptExplainPrompt = (question)=>(`
     }
     Important: Do NOT add any extra text outside the JSON format. Only return valid JSON.
     `)
+
+export const answerTipPrompt = (question)=>(`
+    You are an AI interview coach. Given the following interview question, provide actionable tips on how to answer it effectively in an interview.
+
+    Question: "${question}"
+
+    Consider:
+    - What the interviewer is really looking for with this question
+    - How to structure the answer (e.g., STAR method for behavioral, problem-solution-impact for technical)
+    - Key points to include
+    - Common mistakes to avoid
+    - Whether the answer should focus on technical depth, behavioral examples, or a mix of both
+
+    Keep the tips concise, practical, and focused on helping the candidate deliver a strong, confident answer. Use markdown for formatting if helpful (bold, bullet points, etc.).
+
+    Return the result as a JSON object in this exact format:
+    {
+        "tip": "Your answer tips here"
+    }
+
+    IMPORTANT: In the JSON output, every backslash inside a string MUST be escaped as "\\\\" (double backslash).
+    Only return valid JSON. No extra text.
+    `)
