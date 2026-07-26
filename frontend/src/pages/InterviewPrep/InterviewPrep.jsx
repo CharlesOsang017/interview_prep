@@ -2,7 +2,8 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   LuArrowLeft, LuBrain, LuPin, LuPinOff, LuSparkles, LuBookOpen,
-  LuSend, LuChevronDown, LuChevronUp, LuCopy, LuCheck, LuFileText
+  LuSend, LuChevronDown, LuChevronUp, LuCopy, LuCheck, LuFileText,
+  LuPlus, LuLoader
 } from 'react-icons/lu'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -42,6 +43,9 @@ const InterviewPrep = () => {
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false)
   const [explainingId, setExplainingId] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
+  const [visibleCount, setVisibleCount] = useState(10)
+  const [isGeneratingMore, setIsGeneratingMore] = useState(false)
+  const [isAddingQuestions, setIsAddingQuestions] = useState(false)
 
   const fetchSession = useCallback(async () => {
     if (!sessionId || sessionId === 'demo') {
@@ -68,6 +72,11 @@ const InterviewPrep = () => {
   useEffect(() => {
     fetchSession()
   }, [fetchSession])
+
+  // Reset visible count when questions change
+  useEffect(() => {
+    setVisibleCount(10)
+  }, [session?.questions?.length])
 
   const handleTogglePin = async (questionId) => {
     setPinningId(questionId)
@@ -146,7 +155,53 @@ const InterviewPrep = () => {
       })
     : []
 
+  const visibleQuestions = sortedQuestions.slice(0, visibleCount)
+  const hasMore = sortedQuestions.length > visibleCount
+  const totalHidden = sortedQuestions.length - visibleCount
+
   const pinnedCount = sortedQuestions.filter((q) => q.isPinned).length
+
+  const handleGenerateMoreQuestions = async () => {
+    if (!session) return
+    setIsGeneratingMore(true)
+    try {
+      // Generate 7 new questions via AI
+      const generateRes = await axiosInstance.post(API_PATHS.AI.GENERATE_QUESTIONS, {
+        role: session.role,
+        experience: session.experience,
+        topicsToFocusOn: session.topicsToFocusOn || [],
+        numberOfQuestions: 7,
+      })
+      const newQuestions = generateRes.data
+
+      if (!newQuestions || newQuestions.length === 0) {
+        toast.error('No questions generated — try again')
+        return
+      }
+
+      setIsAddingQuestions(true)
+
+      // Add questions to the session
+      await axiosInstance.post(API_PATHS.QUESTION.ADD_TO_SESSION, {
+        sessionId: session._id,
+        questions: newQuestions,
+      })
+
+      toast.success(`Added ${newQuestions.length} new questions!`)
+
+      // Re-fetch the session to show the updated questions
+      await fetchSession()
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to generate more questions')
+    } finally {
+      setIsGeneratingMore(false)
+      setIsAddingQuestions(false)
+    }
+  }
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => Math.min(prev + 10, sortedQuestions.length))
+  }
 
   if (sessionId === 'demo') {
     return <DemoView navigate={navigate} />
@@ -239,7 +294,7 @@ const InterviewPrep = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {sortedQuestions.map((q, idx) => (
+              {visibleQuestions.map((q, idx) => (
                 <div key={q._id} className="rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-slate-300">
                   {/* Question Header */}
                   <div
@@ -356,8 +411,42 @@ const InterviewPrep = () => {
                   )}
                 </div>
               ))}
+
+              {/* Load More Button */}
+              {hasMore && (
+                <div className="pt-2 text-center">
+                  <button
+                    onClick={handleLoadMore}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-orange-300 hover:text-orange-600"
+                  >
+                    <LuChevronDown size={16} />
+                    Show {totalHidden} more question{totalHidden > 1 ? 's' : ''}
+                  </button>
+                </div>
+              )}
             </div>
           )}
+
+          {/* Generate More Questions */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={handleGenerateMoreQuestions}
+              disabled={isGeneratingMore || isAddingQuestions}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border-2 border-dashed border-orange-300 bg-orange-50 px-6 py-3 text-sm font-semibold text-orange-700 shadow-sm transition hover:border-solid hover:bg-orange-100 disabled:opacity-50"
+            >
+              {isGeneratingMore || isAddingQuestions ? (
+                <>
+                  <LuLoader size={16} className="animate-spin" />
+                  {isGeneratingMore ? 'Generating...' : 'Adding questions...'}
+                </>
+              ) : (
+                <>
+                  <LuPlus size={16} />
+                  Generate More Questions
+                </>
+              )}
+            </button>
+          </div>
         </section>
       </div>
     </div>
