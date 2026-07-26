@@ -35,7 +35,7 @@ const LandingPage = () => {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-500 text-lg font-semibold text-white">
                 IP
               </div>
-              <div>
+              <div className='hidden sm:block'>
                 <p className="text-base font-semibold text-slate-900">Interview Prep</p>
                 <p className="text-xs text-slate-500">AI coaching, simplified</p>
               </div>
