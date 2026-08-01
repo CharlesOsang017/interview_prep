@@ -2,31 +2,31 @@ export const APP_FEATURES = [
   {
     id: '01',
     title: 'Tailored for your role',
-    description: 'Practice with questions that match your target role, seniority, and industry focus.'
+    description: 'Create sessions around the job you want, your experience level, and the topics you want to strengthen most.'
   },
   {
     id: '02',
-    title: 'Instant answer guidance',
-    description: 'Expand weak points, sharpen structure, and refine your responses in real time.'
+    title: 'AI-generated interview questions',
+    description: 'Generate fresh mock questions instantly so you can practice with realistic prompts whenever you need them.'
   },
   {
     id: '03',
-    title: 'Progress you can see',
-    description: 'Track each mock session and watch your confidence grow over time.'
+    title: 'Instant answer guidance',
+    description: 'Get explanations and answer tips that help you improve clarity, structure, and delivery in real time.'
   },
   {
     id: '04',
-    title: 'Flexible prep flow',
-    description: 'Jump in for a quick warm-up or settle in for a deep interview simulation.'
+    title: 'Save notes and pin key prompts',
+    description: 'Keep track of your strongest ideas, revisit important questions, and focus on areas that need extra work.'
   },
   {
     id: '05',
-    title: 'Clear coaching moments',
-    description: 'Receive concise feedback that helps you improve your delivery and messaging.'
+    title: 'Flexible prep flow',
+    description: 'Jump into a quick warm-up or build a deeper interview session that fits your schedule and energy.'
   },
   {
     id: '06',
-    title: 'Built for momentum',
-    description: 'Stay organized with focused sessions that keep your prep moving forward.'
+    title: 'Progress you can see',
+    description: 'Return to past sessions, track your preparation history, and keep building confidence over time.'
   }
 ]
