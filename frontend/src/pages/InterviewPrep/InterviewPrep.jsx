@@ -310,10 +310,7 @@ const InterviewPrep = () => {
                 <span>{session.questions?.length || 0} questions</span>
                 {pinnedCount > 0 && <span>{pinnedCount} pinned</span>}
               </div>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-700">
-              <LuSparkles size={16} /> AI coaching ready
-            </div>
+            </div>   
           </div>
 
           {/* Topics */}

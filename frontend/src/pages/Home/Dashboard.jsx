@@ -1,5 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react'
 import { LuArrowRight, LuBrain, LuClock3, LuSparkles, LuTrash2, LuPlus } from 'react-icons/lu'
+import { FaComputer } from "react-icons/fa6";
+import { MdOutlinePushPin } from "react-icons/md";
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../utils/axiosInstance'
 import { API_PATHS } from '../../utils/apiPaths'
@@ -107,9 +109,9 @@ const Dashboard = () => {
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-3">
           {[
-            { label: 'Total Sessions', value: stats.total, icon: LuBrain, color: 'text-orange-600 bg-orange-50' },
-            { label: 'Pinned Questions', value: stats.pinned, icon: LuSparkles, color: 'text-amber-600 bg-amber-50' },
-            { label: 'Last Activity', value: stats.recent, icon: LuClock3, color: 'text-slate-600 bg-slate-100' }
+            { label: 'Total Sessions', value: stats.total, icon: FaComputer, color: 'text-slate-600 bg-orange-50' },
+            { label: 'Pinned Questions', value: stats.pinned, icon: MdOutlinePushPin, color: 'text-slate-600 bg-amber-50' },
+            { label: 'Last Activity', value: stats.recent, icon: LuClock3, color: 'text-slate-600  bg-amber-50' }
           ].map((stat) => (
             <div key={stat.label} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${stat.color}`}>

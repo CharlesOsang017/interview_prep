@@ -104,33 +104,7 @@ const LandingPage = () => {
                   </p>
                 </div>
               </div>
-            </section>
-
-            <section className="pb-8 pt-16 sm:pt-20">
-              <div className="rounded-[2rem] border border-orange-100 bg-slate-950 p-8 text-white shadow-2xl shadow-orange-100 sm:p-10">
-                <div className="max-w-3xl">
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-300">Why it stands out</p>
-                  <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">Everything you need to practice like you mean it</h2>
-                  <p className="mt-4 text-base leading-8 text-slate-300">
-                    From role-specific questions to coaching moments that help you improve on the spot, this experience turns interview prep into a focused routine you can actually stick with.
-                  </p>
-                </div>
-
-                <div className="mt-8 grid gap-4 md:grid-cols-2">
-                  {[
-                    ['Role-based mock sessions', 'Create prep sessions tailored to the job you want, your experience level, and the topics you want to sharpen.'],
-                    ['Instant guidance for every answer', 'Get explanations and answer tips so you can improve your structure, clarity, and delivery as you practice.'],
-                    ['Notes and pinned questions', 'Save your best ideas, revisit the prompts that matter most, and keep your weak spots front and center.'],
-                    ['A steady prep rhythm', 'Jump into quick warm-ups or build deeper sessions over time without losing momentum.']
-                  ].map(([title, copy]) => (
-                    <div key={title} className="rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur">
-                      <h3 className="text-lg font-semibold text-white">{title}</h3>
-                      <p className="mt-2 text-sm leading-7 text-slate-300">{copy}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
+            </section>      
 
             <section id="features" className="pb-12 pt-10 sm:pt-14">
               <div className="mb-8 text-center">
@@ -140,10 +114,12 @@ const LandingPage = () => {
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {APP_FEATURES.map((feature) => (
                   <div key={feature.id} className="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                   <div className='flex items-center gap-2'>
                     <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 text-sm font-semibold text-orange-600">
                       {feature.id}
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900">{feature.title}</h3>
+                    <h3 className="font-semibold -mt-4  text-sm md:text-md text-slate-900">{feature.title}</h3>
+                    </div>
                     <p className="mt-2 text-sm leading-7 text-slate-600">{feature.description}</p>
                   </div>
                 ))}
