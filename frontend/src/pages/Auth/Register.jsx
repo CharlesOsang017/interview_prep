@@ -91,5 +91,4 @@ const Register = ({ setCurrentPage }) => {
     </div>
   )
 }
-
 export default Register

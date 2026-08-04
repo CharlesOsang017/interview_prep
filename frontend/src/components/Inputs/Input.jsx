@@ -17,7 +17,7 @@ const Input = ({ value, onChange, placeholder, type, label }) => {
           value={value}
           onChange={(e) => onChange(e)}
           placeholder={placeholder}
-          className="w-full bg-transparent text-sm text-slate-700 outline-none"
+          className="w-full outline-none bg-transparent shadow-none autofill:shadow-[0_0_0px_1000px_white_inset]"
         />
 
         {type === 'password' && (
