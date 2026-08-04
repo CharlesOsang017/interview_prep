@@ -62,16 +62,37 @@ export const togglePinQuestion = async (req, res) => {
 // @access Private
 export const updateQuestionNote = async (req, res) => {
   try {
-    const {note} = req.body;
+    const { note } = req.body;
     const question = await Question.findById(req.params.id);
-    if(!question){
-      return res.status(404).json({message: "Question not found"});
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
     }
-    question.note = note || "";
+
+    const normalizedNote = typeof note === "string" ? note.trim() : "";
+    question.note = normalizedNote;
     await question.save();
-    res.status(200).json({success: true, question});
+    res.status(200).json({ success: true, question });
   } catch (error) {
     console.log("error in updateQuestionNote", error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc Delete a note from a question
+// @route DELETE /api/questions/:id/note
+// @access Private
+export const deleteQuestionNote = async (req, res) => {
+  try {
+    const question = await Question.findById(req.params.id);
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    question.note = "";
+    await question.save();
+    res.status(200).json({ success: true, question });
+  } catch (error) {
+    console.log("error in deleteQuestionNote", error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };

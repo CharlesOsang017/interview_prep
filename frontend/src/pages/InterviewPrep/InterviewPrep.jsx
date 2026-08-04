@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   LuArrowLeft, LuBrain, LuPin, LuPinOff, LuSparkles, LuBookOpen,
   LuSend, LuChevronDown, LuChevronUp, LuCopy, LuCheck, LuFileText,
-  LuPlus, LuLoader, LuLightbulb
+  LuPlus, LuLoader, LuLightbulb, LuPencilLine, LuTrash2
 } from 'react-icons/lu'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -36,8 +36,10 @@ const InterviewPrep = () => {
   const [session, setSession] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [expandedQuestion, setExpandedQuestion] = useState(null)
-  const [noteText, setNoteText] = useState({})
+  const [noteDrafts, setNoteDrafts] = useState({})
+  const [editingNoteId, setEditingNoteId] = useState(null)
   const [savingNote, setSavingNote] = useState(null)
+  const [deletingNote, setDeletingNote] = useState(null)
   const [pinningId, setPinningId] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
   const [visibleCount, setVisibleCount] = useState(10)
@@ -98,11 +100,17 @@ const InterviewPrep = () => {
     }
   }
 
+  const handleStartEditNote = (question) => {
+    setNoteDrafts((prev) => ({ ...prev, [question._id]: question.note ?? '' }))
+    setEditingNoteId(question._id)
+  }
+
   const handleSaveNote = async (questionId) => {
+    const trimmedNote = (noteDrafts[questionId] ?? '').trim()
     setSavingNote(questionId)
     try {
       const response = await axiosInstance.post(API_PATHS.QUESTION.UPDATE_NOTE(questionId), {
-        note: noteText[questionId] || ''
+        note: trimmedNote
       })
       setSession((prev) => ({
         ...prev,
@@ -110,11 +118,33 @@ const InterviewPrep = () => {
           q._id === questionId ? response.data.question : q
         )
       }))
-      toast.success('Note saved')
+      setNoteDrafts((prev) => ({ ...prev, [questionId]: trimmedNote }))
+      setEditingNoteId(null)
+      toast.success(trimmedNote ? 'Note saved' : 'Note removed')
     } catch (error) {
       toast.error('Failed to save note')
     } finally {
       setSavingNote(null)
+    }
+  }
+
+  const handleDeleteNote = async (questionId) => {
+    setDeletingNote(questionId)
+    try {
+      const response = await axiosInstance.delete(API_PATHS.QUESTION.UPDATE_NOTE(questionId))
+      setSession((prev) => ({
+        ...prev,
+        questions: prev.questions.map((q) =>
+          q._id === questionId ? response.data.question : q
+        )
+      }))
+      setNoteDrafts((prev) => ({ ...prev, [questionId]: '' }))
+      setEditingNoteId(null)
+      toast.success('Note deleted')
+    } catch (error) {
+      toast.error('Failed to delete note')
+    } finally {
+      setDeletingNote(null)
     }
   }
 
@@ -270,7 +300,7 @@ const InterviewPrep = () => {
         <div className="text-center">
           <LuBrain size={48} className="mx-auto text-slate-300" />
           <h2 className="mt-4 text-xl font-semibold text-slate-900">Session not found</h2>
-          <button className="btn-small mt-6 !inline-flex" onClick={() => navigate('/dashboard')}>
+          <button className="btn-small mt-6 inline-flex!" onClick={() => navigate('/dashboard')}>
             <LuArrowLeft size={16} /> Back to Dashboard
           </button>
         </div>
@@ -310,7 +340,7 @@ const InterviewPrep = () => {
                 <span>{session.questions?.length || 0} questions</span>
                 {pinnedCount > 0 && <span>{pinnedCount} pinned</span>}
               </div>
-            </div>   
+            </div>
           </div>
 
           {/* Topics */}
@@ -473,28 +503,81 @@ const InterviewPrep = () => {
                         )}
 
                         {/* Notes */}
-                        <div className="mt-4">
-                          <label className="mb-2 flex items-center gap-2 text-xs font-semibold text-slate-500">
-                            <LuFileText size={14} /> Notes
-                          </label>
-                          <div className="flex gap-2">
-                            <textarea
-                              value={noteText[q._id] ?? q.note ?? ''}
-                              onChange={(e) =>
-                                setNoteText((prev) => ({ ...prev, [q._id]: e.target.value }))
-                              }
-                              placeholder="Add your notes here..."
-                              rows={3}
-                              className="flex-1 rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
-                            />
-                            <button
-                              onClick={() => handleSaveNote(q._id)}
-                              disabled={savingNote === q._id}
-                              className="self-end cursor-pointer rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50"
-                            >
-                              {savingNote === q._id ? <Loader size="sm" /> : <LuSend size={16} />}
-                            </button>
+                        <div
+                          className="mt-4 rounded-2xl border border-slate-200 bg-white p-3"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="mb-2 flex items-center justify-between">
+                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                              <LuFileText size={14} /> My note pad
+                            </label>
+                            {q.note && editingNoteId !== q._id && (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleStartEditNote(q) }}
+                                  className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-300 hover:text-orange-600"
+                                >
+                                  <LuPencilLine size={12} />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleDeleteNote(q._id) }}
+                                  disabled={deletingNote === q._id}
+                                  className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-rose-300 hover:text-rose-600 disabled:opacity-50"
+                                >
+                                  {deletingNote === q._id ? <Loader size="sm" /> : <LuTrash2 size={12} />}
+                                </button>
+                              </div>
+                            )}
                           </div>
+
+                          {editingNoteId === q._id ? (
+                            <div className="space-y-2">
+                              <textarea
+                                value={noteDrafts[q._id] ?? ''}
+                                onChange={(e) =>
+                                  setNoteDrafts((prev) => ({ ...prev, [q._id]: e.target.value }))
+                                }
+                                placeholder="Add a note for this question..."
+                                rows={3}
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
+                              />
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  onClick={() => handleSaveNote(q._id)}
+                                  disabled={savingNote === q._id}
+                                  className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-slate-900 px-2 py-1 text-xs font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50"
+                                >
+                                  {savingNote === q._id ? <Loader size={10} /> : <LuSend size={10} />} {savingNote === q._id ? 'Saving...' : 'Save note'}
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setEditingNoteId(null) }}
+                                  className="rounded-2xl border border-slate-200 px-2 py-1 text-xs cursor-pointer font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              {q.note ? (
+                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 whitespace-pre-wrap">
+                                  {q.note}
+                                </div>
+                              ) : (
+                                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 text-sm text-slate-500">
+                                  No note yet. Add a note to start.
+                                </div>
+                              )}
+                              {!q.note && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleStartEditNote(q) }}
+                                  className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-600 transition hover:border-orange-300 hover:text-orange-600"
+                                >
+                                  <LuPencilLine size={14} /> Add note
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
