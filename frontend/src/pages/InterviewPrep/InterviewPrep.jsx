@@ -605,7 +605,7 @@ const InterviewPrep = () => {
             <button
               onClick={handleGenerateMoreQuestions}
               disabled={isGeneratingMore || isAddingQuestions}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full border-2 border-dashed border-orange-300 bg-orange-50 px-6 py-3 text-sm font-semibold text-orange-700 shadow-sm transition hover:border-solid hover:bg-orange-100 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-3 text-sm cursor-pointer font-semibold text-slate-700 shadow-md transition hover:border-orange-300 hover:text-orange-600"
             >
               {isGeneratingMore || isAddingQuestions ? (
                 <>
