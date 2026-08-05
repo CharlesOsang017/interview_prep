@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   LuArrowLeft,
+  LuArrowRight,
   LuBrain,
   LuPin,
   LuPinOff,
@@ -56,7 +57,8 @@ const InterviewPrep = () => {
   const [deletingNote, setDeletingNote] = useState(null);
   const [pinningId, setPinningId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
-  const [visibleCount, setVisibleCount] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
   const [isGeneratingMore, setIsGeneratingMore] = useState(false);
   const [isAddingQuestions, setIsAddingQuestions] = useState(false);
 
@@ -93,9 +95,9 @@ const InterviewPrep = () => {
     fetchSession();
   }, [fetchSession]);
 
-  // Reset visible count when questions change
+  // Reset page when questions change
   useEffect(() => {
-    setVisibleCount(10);
+    setCurrentPage(1);
   }, [session?.questions?.length]);
 
   const handleTogglePin = async (questionId) => {
@@ -269,9 +271,17 @@ const InterviewPrep = () => {
       })
     : [];
 
-  const visibleQuestions = sortedQuestions.slice(0, visibleCount);
-  const hasMore = sortedQuestions.length > visibleCount;
-  const totalHidden = sortedQuestions.length - visibleCount;
+  const totalPages = Math.ceil(sortedQuestions.length / pageSize);
+  const currentPageSafe = Math.min(
+    Math.max(currentPage, 1),
+    Math.max(totalPages, 1),
+  );
+  const paginatedQuestions = sortedQuestions.slice(
+    (currentPageSafe - 1) * pageSize,
+    currentPageSafe * pageSize,
+  );
+  const pageStart = sortedQuestions.length === 0 ? 0 : (currentPageSafe - 1) * pageSize + 1;
+  const pageEnd = pageStart + paginatedQuestions.length - 1;
 
   const pinnedCount = sortedQuestions.filter((q) => q.isPinned).length;
 
@@ -314,9 +324,6 @@ const InterviewPrep = () => {
     }
   };
 
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(prev + 10, sortedQuestions.length));
-  };
 
   if (sessionId === "demo") {
     return <DemoView navigate={navigate} />;
@@ -419,7 +426,8 @@ const InterviewPrep = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {visibleQuestions.map((q, idx) => {
+              {paginatedQuestions.map((q, idx) => {
+                const displayIndex = pageStart + idx;
                 const hasExplanation =
                   q.explanation?.title && q.explanation?.explanation;
                 const hasTip = q.answerTip;
@@ -449,7 +457,7 @@ const InterviewPrep = () => {
                             />
                           )}
                           <p className="text-sm font-semibold text-slate-900">
-                            {idx + 1}. {q.question}
+                            {displayIndex}. {q.question}
                           </p>
                         </div>
                       </div>
@@ -702,43 +710,102 @@ const InterviewPrep = () => {
                 );
               })}
 
-              {/* Load More Button */}
-              {hasMore && (
-                <div className="pt-2 text-center">
-                  <button
-                    onClick={handleLoadMore}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-orange-300 hover:text-orange-600"
-                  >
-                    <LuChevronDown size={16} />
-                    Show {totalHidden} more question{totalHidden > 1 ? "s" : ""}
-                  </button>
+              {totalPages > 1 && (
+                <div className="mt-4 flex flex-col gap-4 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-sm text-slate-500">
+                    Showing {pageStart}–{pageEnd} of {sortedQuestions.length} questions
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(currentPageSafe - 1)}
+                      disabled={currentPageSafe === 1}
+                      className="inline-flex cursor-pointer h-9 items-center justify-center rounded-full border px-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <LuArrowLeft size={16} />
+                    </button>
+                    {(() => {
+                      const pageButtons = [];
+                      const startPage = Math.max(2, currentPageSafe - 1);
+                      const endPage = Math.min(totalPages - 1, currentPageSafe + 1);
+
+                      pageButtons.push(1);
+
+                      if (startPage > 2) {
+                        pageButtons.push("left-ellipsis");
+                      }
+
+                      for (let page = startPage; page <= endPage; page += 1) {
+                        pageButtons.push(page);
+                      }
+
+                      if (endPage < totalPages - 1) {
+                        pageButtons.push("right-ellipsis");
+                      }
+
+                      if (totalPages > 1) {
+                        pageButtons.push(totalPages);
+                      }
+
+                      return pageButtons.map((page, index) => {
+                        if (typeof page === "string") {
+                          return (
+                            <span
+                              key={`${page}-${index}`}
+                              className="inline-flex h-9 items-center justify-center rounded-full px-3 text-sm text-slate-500"
+                            >
+                              …
+                            </span>
+                          );
+                        }
+
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`inline-flex h-9 cursor-pointer min-w-[2rem] items-center justify-center rounded-full border px-3 text-sm font-semibold transition ${
+                              page === currentPageSafe
+                                ? "border-orange-300 bg-orange-400 text-white"
+                                : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      });
+                    })()}
+                    <button
+                      onClick={() => setCurrentPage(currentPageSafe + 1)}
+                      disabled={currentPageSafe === totalPages}
+                      className="inline-flex h-9 cursor-pointer items-center justify-center rounded-full border px-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <LuArrowRight size={16} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           )}
 
           {/* Generate More Questions */}
-          {!hasMore && (
-            <div className="mt-6 flex justify-center">
-              <button
-                onClick={handleGenerateMoreQuestions}
-                disabled={isGeneratingMore || isAddingQuestions}
-                className="flex items-center gap-2 px-6 py-3 text-sm cursor-pointer font-semibold text-slate-700 shadow-md transition hover:border-orange-300 hover:text-orange-600"
-              >
-                {isGeneratingMore || isAddingQuestions ? (
-                  <>
-                    <LuLoader size={16} className="animate-spin" />
-                    {isGeneratingMore ? "Generating..." : "Adding questions..."}
-                  </>
-                ) : (
-                  <>
-                    <LuPlus size={16} />
-                    Generate More Questions
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={handleGenerateMoreQuestions}
+              disabled={isGeneratingMore || isAddingQuestions}
+              className="flex items-center gap-2 px-6 py-3 text-sm cursor-pointer font-semibold text-slate-700 shadow-md transition hover:border-orange-300 hover:text-orange-600"
+            >
+              {isGeneratingMore || isAddingQuestions ? (
+                <>
+                  <LuLoader size={16} className="animate-spin" />
+                  {isGeneratingMore ? "Generating..." : "Adding questions..."}
+                </>
+              ) : (
+                <>
+                  <LuPlus size={16} />
+                  Generate More Questions
+                </>
+              )}
+            </button>
+          </div>
         </section>
       </div>
     </div>
