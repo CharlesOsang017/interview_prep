@@ -31,4 +31,4 @@ deploy-dev-vpn:
     - main
 
 
-kubectl create secret docker-registry gitlab-registry-secret --docker-server=registry.gitlab.com --docker-username="charlesosango02" --docker-password="4CDAKS56ou6jkxkV7TptrmM6MQpvOjEKcDoxZnl1emsQ.01.181cftwvt" --docker-email="charlesosango02@gmail.com" -n dev
+kubectl create secret docker-registry gitlab-registry-secret --docker-server=registry.gitlab.com --docker-username="charlesosango02" --docker-password="glpat-B8PkzRJJYUN7RW0enXX8LGM6MQpvOjEKdTpwbmRpYg8.01.171ogxn82" --docker-email="charlesosango02@gmail.com" -n dev --dry-run=client -o yaml | kubectl apply -f -
