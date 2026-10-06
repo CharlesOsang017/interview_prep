@@ -29,3 +29,6 @@ deploy-dev-vpn:
     - kubectl rollout status deployment/my-frontend-app -n dev --timeout=120s
   only:
     - main
+
+
+kubectl create secret docker-registry gitlab-registry-secret --docker-server=registry.gitlab.com --docker-username="charlesosango02" --docker-password="4CDAKS56ou6jkxkV7TptrmM6MQpvOjEKcDoxZnl1emsQ.01.181cftwvt" --docker-email="charlesosango02@gmail.com" -n dev
