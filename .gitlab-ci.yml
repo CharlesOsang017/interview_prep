@@ -1,0 +1,31 @@
+stages:
+  - build
+  - deploy
+
+build-frontend:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/frontend"
+      --dockerfile "${CI_PROJECT_DIR}/frontend/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/frontend:latest"
+  only:
+    - main
+
+deploy-dev-vpn:
+  stage: deploy
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  script:
+    - kubectl config use-context $CI_PROJECT_PATH:my-local-cluster
+    - kubectl create namespace dev --dry-run=client -o yaml | kubectl apply -f -
+    - kubectl create secret docker-registry gitlab-registry-secret --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --namespace=dev --dry-run=client -o yaml | kubectl apply -f -
+    - kubectl apply -f k8s-manifests.yaml
+    - kubectl rollout restart deployment/my-frontend-app -n dev
+    - kubectl rollout status deployment/my-frontend-app -n dev --timeout=120s
+  only:
+    - main
